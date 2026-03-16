@@ -1,0 +1,71 @@
+{
+  "projectType": "api-service",
+  "projectName": "Body Works API",
+  "projectDescription": "A RESTful API built with Express.js and MongoDB that provides comprehensive fitness data including exercises, body parts, target muscles, equipment, and workout routines.",
+  "theme": "sequoia",
+  "primaryColor": "#E8533F",
+  "lightColor": "#F97B6B",
+  "darkColor": "#C23D2C",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Guides",
+            "pages": ["guides/authentication", "guides/rate-limits", "guides/filtering", "guides/pagination"]
+          },
+          {
+            "group": "Self-Hosting",
+            "pages": ["self-hosting/setup", "self-hosting/docker", "self-hosting/environment"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["api-reference/overview"]
+          },
+          {
+            "group": "Exercises",
+            "pages": ["api-reference/exercises/list", "api-reference/exercises/get"]
+          },
+          {
+            "group": "Routines",
+            "pages": ["api-reference/routines/list", "api-reference/routines/get"]
+          },
+          {
+            "group": "Categories",
+            "pages": ["api-reference/body-parts/list", "api-reference/target-muscles/list", "api-reference/equipments/list"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Comprehensive exercise database with images, GIFs, instructional blogs, and video links",
+    "Filterable exercise search by body part, target muscle, equipment, and keyword",
+    "Full workout routine library with categorization by goal, level, duration, and gender",
+    "Category endpoints for body parts, target muscles, and equipment with exercise counts",
+    "Rate limiting with tiered limits (20,000 req/15min general, 20 req/15min for routines)",
+    "MongoDB backend via Prisma ORM with optimized indexes for fast filtering",
+    "Docker support for easy deployment",
+    "Security hardened with Helmet, CORS, and HSTS"
+  ],
+  "publicApiSurface": [
+    "GET /api/v1/exercises",
+    "GET /api/v1/exercises/:id",
+    "GET /api/v1/bodyParts",
+    "GET /api/v1/targetMuscles",
+    "GET /api/v1/equipments",
+    "GET /api/v1/routines",
+    "GET /api/v1/routines/:id",
+    "GET /health"
+  ]
+}
