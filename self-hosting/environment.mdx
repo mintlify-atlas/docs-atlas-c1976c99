@@ -1,0 +1,67 @@
+---
+title: Environment variables
+description: Reference for all environment variables used by the Body Works API.
+---
+
+The Body Works API is configured entirely through environment variables. These can be set in a `.env` file at the project root, or passed directly to the process or container.
+
+<Warning>
+  `DATABASE_URL` is required. The server will not start without a valid MongoDB connection string.
+</Warning>
+
+## Variables
+
+<ParamField path="DATABASE_URL" type="string" required>
+  MongoDB connection string. Used by Prisma to connect to your database.
+
+  ```
+  mongodb+srv://user:pass@cluster.mongodb.net/bodyworks
+  ```
+</ParamField>
+
+<ParamField path="PORT" type="number" default="8000">
+  Port the HTTP server listens on. Defaults to `8000` if not set.
+
+  ```
+  8000
+  ```
+</ParamField>
+
+<ParamField path="NODE_ENV" type="string" default="development">
+  Controls runtime behavior:
+
+  - `production` — enables strict CORS (requires `ALLOWED_ORIGINS`), combined request logging, and production-safe error messages that do not expose stack traces.
+  - `development` — allows all CORS origins and returns verbose error details.
+</ParamField>
+
+<ParamField path="ALLOWED_ORIGINS" type="string">
+  Comma-separated list of origins permitted to make cross-origin requests. Only enforced when `NODE_ENV=production`.
+
+  ```
+  https://myapp.com,https://app.myapp.com
+  ```
+
+  <Warning>
+    In `NODE_ENV=production`, if `ALLOWED_ORIGINS` is not set, all CORS requests will be blocked. Set this to at least one valid origin before deploying.
+  </Warning>
+</ParamField>
+
+## Example .env file
+
+```env
+# Required — MongoDB connection string
+DATABASE_URL=mongodb+srv://user:pass@cluster.mongodb.net/bodyworks
+
+# Optional — defaults to 8000
+PORT=8000
+
+# Optional — defaults to development
+NODE_ENV=production
+
+# Required in production — comma-separated allowed CORS origins
+ALLOWED_ORIGINS=https://myapp.com,https://app.myapp.com
+```
+
+<Tip>
+  Copy `.env.example` from the repository root as a starting point: `cp .env.example .env`
+</Tip>

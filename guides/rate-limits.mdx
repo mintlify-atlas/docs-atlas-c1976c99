@@ -1,0 +1,123 @@
+---
+title: Rate limits
+description: The Body Works API enforces two rate limit tiers depending on the endpoint.
+---
+
+The API uses per-IP rate limiting with two tiers: a general tier for most endpoints, and a stricter tier for the routines endpoint.
+
+## Rate limit tiers
+
+| Endpoint | Limit | Window |
+|---|---|---|
+| `/api/v1/exercises` | 20,000 requests | 15 minutes |
+| `/api/v1/bodyParts` | 20,000 requests | 15 minutes |
+| `/api/v1/targetMuscles` | 20,000 requests | 15 minutes |
+| `/api/v1/equipments` | 20,000 requests | 15 minutes |
+| `/api/v1/routines` | 20 requests | 15 minutes |
+
+Limits are applied per IP address. If you share an IP with other clients (e.g., behind a NAT or proxy), the quota is shared.
+
+<Warning>
+The `/api/v1/routines` endpoint has a significantly lower limit of 20 requests per 15-minute window. Design your application to cache routine responses or batch requests where possible.
+</Warning>
+
+## Rate limit headers
+
+Every response includes rate limit headers following the [draft-7 standard](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/):
+
+| Header | Description |
+|---|---|
+| `RateLimit-Policy` | Describes the active limit policy (e.g., `20000;w=900`) |
+| `RateLimit` | Current state: remaining quota and window reset time |
+
+Example response headers from a general endpoint:
+
+```
+RateLimit-Policy: 20000;w=900
+RateLimit: limit=20000, remaining=19987, reset=543
+```
+
+Example response headers from the routines endpoint:
+
+```
+RateLimit-Policy: 20;w=900
+RateLimit: limit=20, remaining=17, reset=721
+```
+
+`reset` is the number of seconds until the current window expires and the quota resets.
+
+## HTTP 429 — rate limit exceeded
+
+When you exceed the limit, the API responds with HTTP `429 Too Many Requests`.
+
+**General endpoints (429 response body):**
+
+```json
+{
+  "error": "Too many requests from this IP, please try again later."
+}
+```
+
+**Routines endpoint (429 response body):**
+
+```json
+{
+  "error": "Rate limit exceeded for this endpoint."
+}
+```
+
+## Handling 429 errors
+
+When you receive a 429, check the `RateLimit` header for the `reset` value and wait that many seconds before retrying. Use exponential backoff for repeated failures.
+
+<Steps>
+  <Step title="Check the response status">
+    Inspect the HTTP status code. If it is `429`, do not retry immediately.
+  </Step>
+  <Step title="Read the reset time">
+    Parse the `reset` field from the `RateLimit` header to determine how many seconds remain in the current window.
+  </Step>
+  <Step title="Wait and retry">
+    Wait at least `reset` seconds, then retry the request. Apply exponential backoff if the 429 persists.
+  </Step>
+</Steps>
+
+### JavaScript example
+
+```javascript
+async function fetchWithRetry(url, maxRetries = 3) {
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    const response = await fetch(url);
+
+    if (response.status !== 429) {
+      return response;
+    }
+
+    // Parse reset time from RateLimit header
+    const rateLimitHeader = response.headers.get('RateLimit');
+    const resetMatch = rateLimitHeader && rateLimitHeader.match(/reset=(\d+)/);
+    const resetSeconds = resetMatch ? parseInt(resetMatch[1], 10) : 60;
+
+    // Exponential backoff: wait reset time + jitter
+    const backoff = resetSeconds * 1000 + Math.random() * 1000 * attempt;
+    console.warn(`Rate limited. Retrying in ${Math.ceil(backoff / 1000)}s...`);
+    await new Promise((resolve) => setTimeout(resolve, backoff));
+
+    attempt++;
+  }
+
+  throw new Error(`Request failed after ${maxRetries} retries due to rate limiting.`);
+}
+
+// Usage
+const response = await fetchWithRetry(
+  'https://api.bodyworks.akshatjaiswal.me/api/v1/exercises'
+);
+const data = await response.json();
+```
+
+<Tip>
+For the routines endpoint, consider caching responses locally. With only 20 requests per 15-minute window, a single page load that fires multiple routine requests can exhaust the quota quickly.
+</Tip>

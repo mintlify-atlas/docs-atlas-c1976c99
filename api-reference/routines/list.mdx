@@ -1,0 +1,240 @@
+---
+title: 'List routines'
+description: 'Retrieve a paginated list of workout routines, with filters for goal, training level, duration, equipment, and more.'
+---
+
+**`GET /api/v1/routines`**
+
+Returns a paginated list of structured workout programs. Supports extensive filtering by training goal, level, duration, equipment, and more.
+
+<Warning>
+This endpoint enforces a stricter rate limit of **20 requests per 15 minutes** per IP address. Exceeding this limit returns a `429` response with `{ "error": "Rate limit exceeded for this endpoint." }`.
+</Warning>
+
+## Query parameters
+
+<ParamField query="page" type="number" default="1">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="number" default="10">
+  Number of routines to return per page.
+</ParamField>
+
+<ParamField query="goal" type="string">
+  Filter by training goal.
+
+  Example values: `build muscle`, `lose fat`.
+</ParamField>
+
+<ParamField query="type" type="string">
+  Filter by workout type.
+
+  Example values: `full body`, `split`.
+</ParamField>
+
+<ParamField query="level" type="string">
+  Filter by training level.
+
+  Example values: `beginner`, `intermediate`, `advanced`.
+</ParamField>
+
+<ParamField query="duration" type="string">
+  Filter by program duration.
+
+  Example values: `4 weeks`, `8 weeks`.
+</ParamField>
+
+<ParamField query="days_per_week" type="number">
+  Filter by number of training days per week.
+
+  Example values: `4`, `5`, `6`.
+</ParamField>
+
+<ParamField query="time" type="string">
+  Filter by estimated time per workout session.
+
+  Example values: `30-60 minutes`, `60-75 minutes`.
+</ParamField>
+
+<ParamField query="equipment" type="string">
+  Filter by equipment required. Use values returned by `GET /api/v1/equipments`.
+
+  Example values: `bodyweight`, `barbell, bodyweight, cables, dumbbells`.
+</ParamField>
+
+<ParamField query="gender" type="string">
+  Filter by target gender.
+
+  Example values: `male`, `female`.
+</ParamField>
+
+<ParamField query="category" type="string">
+  Filter by routine category.
+
+  Example values: `Workout for men`, `Muscle Building`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Free-text search against routine titles and descriptions.
+</ParamField>
+
+## Response schema
+
+<ResponseField name="totalRoutines" type="number">
+  Total number of routines matching the query.
+</ResponseField>
+
+<ResponseField name="totalPages" type="number">
+  Total number of pages based on the requested `limit`.
+</ResponseField>
+
+<ResponseField name="finalData" type="object[]">
+  Array of routine objects.
+
+  <Expandable title="Routine object properties">
+    <ResponseField name="id" type="number">
+      Unique routine identifier (integer).
+    </ResponseField>
+    <ResponseField name="category" type="string[]">
+      Array of category tags applied to the routine (e.g. `["Workouts For Men", "Muscle Building", "Full Body"]`).
+    </ResponseField>
+    <ResponseField name="routine" type="object">
+      The full routine details.
+
+      <Expandable title="Routine detail properties">
+        <ResponseField name="routine_title" type="string">
+          Title of the workout program.
+        </ResponseField>
+        <ResponseField name="routine_description" type="string">
+          Overview description of the program.
+        </ResponseField>
+        <ResponseField name="routine_imageUrl" type="string">
+          Relative URL of the routine's cover image.
+        </ResponseField>
+        <ResponseField name="workout_summary" type="object">
+          Key metadata about the program.
+
+          <Expandable title="Workout summary properties">
+            <ResponseField name="Main Goal" type="string">
+              Primary training objective (e.g. `Build Muscle`).
+            </ResponseField>
+            <ResponseField name="Workout Type" type="string">
+              Structure of the program (e.g. `Full Body`).
+            </ResponseField>
+            <ResponseField name="Training Level" type="string">
+              Intended experience level (e.g. `Beginner`).
+            </ResponseField>
+            <ResponseField name="Program Duration" type="string">
+              How long the program runs (e.g. `4 weeks`).
+            </ResponseField>
+            <ResponseField name="Days Per Week" type="string">
+              Number of training days per week.
+            </ResponseField>
+            <ResponseField name="Time Per Workout" type="string">
+              Estimated session length (e.g. `30-60 minutes`).
+            </ResponseField>
+            <ResponseField name="Equipment Required" type="string">
+              Equipment needed (e.g. `Bodyweight`).
+            </ResponseField>
+            <ResponseField name="Target Gender" type="string">
+              Intended audience (e.g. `Male & Female`).
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+        <ResponseField name="workout_plan" type="object[]">
+          Array of workout plan sections.
+
+          <Expandable title="Workout plan section properties">
+            <ResponseField name="heading" type="string">
+              Section heading (e.g. `Complex 1`).
+            </ResponseField>
+            <ResponseField name="day_plan" type="string">
+              HTML table string containing the day's exercise schedule.
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+### Basic request
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?page=1&limit=10"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://api.bodyworks.akshatjaiswal.me/api/v1/routines?page=1&limit=10'
+);
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+### Filtered request (beginner full body routines)
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?level=beginner&type=full%20body&limit=10"
+```
+
+```javascript JavaScript
+const params = new URLSearchParams({
+  level: 'beginner',
+  type: 'full body',
+  limit: '10',
+});
+
+const response = await fetch(
+  `https://api.bodyworks.akshatjaiswal.me/api/v1/routines?${params}`
+);
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+### Example response
+
+```json
+{
+  "totalRoutines": 604,
+  "totalPages": 302,
+  "finalData": [
+    {
+      "category": ["Workouts For Men", "Muscle Building", "Full Body"],
+      "routine": {
+        "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
+        "routine_description": "No equipment or gym? No problem...",
+        "routine_imageUrl": "api.bodyworks.akshatjaiswal.me/assets/routine/1.webp",
+        "workout_summary": {
+          "Main Goal": "Build Muscle",
+          "Workout Type": "Full Body",
+          "Training Level": "Beginner",
+          "Program Duration": "4 weeks",
+          "Days Per Week": "4",
+          "Time Per Workout": "30-60 minutes",
+          "Equipment Required": "Bodyweight",
+          "Target Gender": "Male & Female"
+        },
+        "workout_plan": [
+          {
+            "heading": "Complex 1",
+            "day_plan": "<table>...</table>"
+          }
+        ]
+      },
+      "id": 1
+    }
+  ]
+}
+```

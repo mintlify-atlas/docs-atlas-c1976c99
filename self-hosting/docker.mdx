@@ -1,0 +1,109 @@
+---
+title: Docker
+description: Deploy the Body Works API using Docker and Docker Compose.
+---
+
+The Body Works API ships with a `Dockerfile` and `docker-compose.yml` for containerized deployments.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) 20.10 or later
+- [Docker Compose](https://docs.docker.com/compose/install/) v2 or later (`docker compose`, not `docker-compose`)
+- A running MongoDB instance ([Atlas](https://www.mongodb.com/atlas) or self-hosted)
+
+## Configuration
+
+Before starting the container, set the required environment variables. Copy the example file:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your values:
+
+```env
+DATABASE_URL=mongodb+srv://user:pass@cluster.mongodb.net/bodyworks
+PORT=8000
+NODE_ENV=production
+ALLOWED_ORIGINS=https://myapp.com,https://app.myapp.com
+```
+
+<Warning>
+  `DATABASE_URL` is required. The container will exit immediately if it is not set. See the [environment variables reference](/self-hosting/environment) for all options.
+</Warning>
+
+## Running the container
+
+<Steps>
+  <Step title="Build and start">
+    Build the image and start the container in the foreground:
+
+    ```bash
+    docker compose up --build
+    ```
+
+    The API is available at `http://localhost:8000` once startup completes.
+  </Step>
+
+  <Step title="Verify the server is running">
+    Check the health endpoint:
+
+    ```bash
+    curl http://localhost:8000/health
+    ```
+
+    Expected response:
+
+    ```json
+    {
+      "status": "OK",
+      "timestamp": "2026-03-16T00:00:00.000Z"
+    }
+    ```
+  </Step>
+
+  <Step title="Run in detached mode">
+    To run the container in the background, add the `-d` flag:
+
+    ```bash
+    docker compose up --build -d
+    ```
+  </Step>
+
+  <Step title="View logs">
+    Stream logs from the running container:
+
+    ```bash
+    docker compose logs -f
+    ```
+
+    Press `Ctrl+C` to stop following.
+  </Step>
+</Steps>
+
+## Port mapping
+
+The container exposes port `8000` and maps it to the same port on the host. To use a different host port, update the `ports` entry in `docker-compose.yml`:
+
+```yaml
+ports:
+  - "3000:8000"  # host:container
+```
+
+The API would then be reachable at `http://localhost:3000`.
+
+## Production CORS
+
+<Note>
+  When `NODE_ENV=production`, CORS is restricted to the origins listed in `ALLOWED_ORIGINS`. If `ALLOWED_ORIGINS` is not set, all cross-origin requests will be blocked. Set it to a comma-separated list of your frontend URLs:
+
+  ```env
+  ALLOWED_ORIGINS=https://myapp.com,https://app.myapp.com
+  ```
+</Note>
+
+## Stopping the container
+
+```bash
+docker compose down
+```

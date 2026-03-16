@@ -1,0 +1,56 @@
+---
+title: Authentication
+description: The Body Works API requires no authentication. All endpoints are publicly accessible.
+---
+
+The Body Works API is fully public. You do not need an API key, token, bearer credential, or OAuth flow to make requests. Every endpoint is open and accessible to any client.
+
+## No credentials required
+
+Send requests directly to the API without any authorization headers:
+
+```bash
+curl https://api.bodyworks.akshatjaiswal.me/api/v1/exercises
+```
+
+There are no:
+- API keys
+- Bearer tokens
+- OAuth 2.0 flows
+- Session cookies
+- Signed requests
+
+<Note>
+The public hosted API at `https://api.bodyworks.akshatjaiswal.me` is open to all. No account or registration is needed.
+</Note>
+
+## Headers for basic usage
+
+For standard read requests, no special headers are required beyond what your HTTP client sends automatically.
+
+```bash
+# Minimal valid request — no extra headers needed
+curl https://api.bodyworks.akshatjaiswal.me/api/v1/bodyParts
+```
+
+If you are sending requests from a browser-based application, your browser will handle `Content-Type` and `Accept` headers automatically.
+
+## CORS for self-hosted deployments
+
+If you are self-hosting the Body Works API, CORS behavior is controlled by the `ALLOWED_ORIGINS` environment variable. In production, only origins listed in `ALLOWED_ORIGINS` will be permitted to make cross-origin requests.
+
+<Tip>
+When running your own instance, set `ALLOWED_ORIGINS` to include your frontend's domain before deploying. For example:
+
+```bash
+ALLOWED_ORIGINS=https://yourapp.com,https://staging.yourapp.com
+```
+
+Without this, browser-based clients on unlisted origins will have their requests blocked by CORS policy.
+</Tip>
+
+For local development, CORS restrictions are typically relaxed so you can test freely without configuring allowed origins.
+
+<Note>
+CORS configuration only affects self-hosted deployments. The public API at `https://api.bodyworks.akshatjaiswal.me` handles its own CORS policy.
+</Note>

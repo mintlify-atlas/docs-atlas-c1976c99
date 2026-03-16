@@ -1,0 +1,107 @@
+---
+title: 'Introduction'
+description: 'Overview of the Body Works API — what it provides, how to use it, and where to start.'
+---
+
+Body Works is a REST API that provides structured data for building fitness and workout applications. It exposes a catalog of exercises, workout routines, body parts, target muscles, and equipment — all as JSON, with no authentication required.
+
+## Base URL
+
+```
+https://api.bodyworks.akshatjaiswal.me/api/v1
+```
+
+All endpoint paths listed in this documentation are relative to this base URL.
+
+## No authentication required
+
+All endpoints are public. You do not need an API key, token, or any form of credentials to make requests. Send requests directly from your client, server, or terminal.
+
+## Start here
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="bolt" href="/quickstart">
+    Make your first API call in minutes with real curl and JavaScript examples.
+  </Card>
+  <Card title="API reference" icon="code" href="/api-reference/overview">
+    Full parameter and response documentation for every endpoint.
+  </Card>
+  <Card title="Rate limits" icon="gauge" href="/guides/rate-limits">
+    Understand request limits before building in production.
+  </Card>
+  <Card title="Self-hosting" icon="server" href="/self-hosting/setup">
+    Run the Body Works API on your own infrastructure.
+  </Card>
+</CardGroup>
+
+## Data overview
+
+The API exposes five categories of data:
+
+| Resource | Description |
+|---|---|
+| **Exercises** | Individual exercises with name, instructions, muscle targets, equipment requirements, body part, and GIF demonstrations. |
+| **Routines** | Structured workout programs with goals, difficulty levels, schedule, and exercise lists. |
+| **Body parts** | A reference list of body parts used to filter exercises (e.g., `chest`, `back`, `legs`). |
+| **Target muscles** | A reference list of specific muscles targeted by exercises (e.g., `biceps`, `quads`). |
+| **Equipment** | A reference list of equipment types used in exercises (e.g., `barbell`, `dumbbell`, `body weight`). |
+
+## Response format
+
+All responses are JSON. List endpoints return a paginated envelope:
+
+```json
+{
+  "success": true,
+  "count": 10,
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 130,
+    "totalItems": 1300,
+    "itemsPerPage": 10,
+    "hasNextPage": true,
+    "hasPrevPage": false
+  },
+  "data": [
+    { ... }
+  ]
+}
+```
+
+Single-resource endpoints return the item directly under `data`:
+
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+Error responses include a `message` field explaining what went wrong:
+
+```json
+{
+  "success": false,
+  "message": "Resource not found"
+}
+```
+
+## Rate limits
+
+Most endpoints allow up to **20,000 requests per 15-minute window**. The routines endpoint has a stricter limit.
+
+<Warning>
+  The `/api/v1/routines` endpoint is limited to **20 requests per 15-minute window**. Cache routine responses where possible and avoid polling this endpoint in hot paths.
+</Warning>
+
+See the [rate limits](/guides/rate-limits) page for a full breakdown and guidance on handling `429` responses.
+
+## Health check
+
+A health check endpoint is available outside the versioned path:
+
+```
+GET https://api.bodyworks.akshatjaiswal.me/health
+```
+
+This endpoint returns a `200 OK` when the service is up and is useful for uptime monitoring.

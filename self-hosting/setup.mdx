@@ -1,0 +1,89 @@
+---
+title: Setup
+description: Install and run the Body Works API on your own server without Docker.
+---
+
+This guide walks you through setting up the Body Works API directly on a host machine using Node.js.
+
+## Prerequisites
+
+- Node.js 18 or later
+- npm (included with Node.js)
+- A running MongoDB instance ([Atlas](https://www.mongodb.com/atlas) or self-hosted)
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/your-org/body-works-api.git
+    cd body-works-api
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Use `npm ci` to install exact versions from the lockfile:
+
+    ```bash
+    npm ci --only=production
+    ```
+  </Step>
+
+  <Step title="Generate the Prisma client">
+    The Prisma client must be generated before the server can start:
+
+    ```bash
+    npx prisma generate
+    ```
+  </Step>
+
+  <Step title="Create your .env file">
+    Copy the example environment file and fill in your values:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Open `.env` and set at minimum your `DATABASE_URL`:
+
+    ```env
+    DATABASE_URL=mongodb+srv://user:pass@cluster.mongodb.net/bodyworks
+    PORT=8000
+    NODE_ENV=production
+    ALLOWED_ORIGINS=https://myapp.com
+    ```
+
+    <Warning>
+      The server will not start without a valid `DATABASE_URL`. See the [environment variables reference](/self-hosting/environment) for all options.
+    </Warning>
+  </Step>
+
+  <Step title="Start the server">
+    ```bash
+    node server.js
+    ```
+
+    The server listens on port `8000` by default, or the port specified in your `PORT` environment variable.
+  </Step>
+
+  <Step title="Verify the server is running">
+    Send a request to the health check endpoint:
+
+    ```bash
+    curl http://localhost:8000/health
+    ```
+
+    A successful response looks like:
+
+    ```json
+    {
+      "status": "OK",
+      "timestamp": "2026-03-16T00:00:00.000Z"
+    }
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  To keep the process running after you close your terminal, use a process manager like [PM2](https://pm2.keymetrics.io/): `pm2 start server.js --name body-works-api`
+</Tip>

@@ -1,97 +1,80 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Body Works API"
+description: "A comprehensive fitness data API providing exercises, workout routines, body parts, target muscles, and equipment — all accessible via simple REST endpoints."
 ---
 
-## Setting up
-
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Make your first API request in under 5 minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    Explore all endpoints, parameters, and response schemas.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Rate Limits" icon="gauge-high" href="/guides/rate-limits">
+    Understand the request limits for each endpoint.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Self-Hosting" icon="server" href="/self-hosting/setup">
+    Deploy your own instance with Docker.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What is Body Works API?
 
-Everything you need to create world-class documentation.
+Body Works API is a RESTful service that gives developers access to a large fitness database. It powers workout apps, exercise trackers, and health platforms with structured data on:
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+- **Exercises** — detailed records with target muscles, equipment, instructional blogs, images, GIFs, and YouTube videos
+- **Workout Routines** — curated programs categorized by goal, training level, duration, days per week, and equipment
+- **Body Parts** — categorized body regions with exercise counts for filtering
+- **Target Muscles** — specific muscle groups with exercise counts
+- **Equipment** — gym and bodyweight equipment types with exercise counts
 
-## Need inspiration?
+## Base URL
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+All requests are made to:
+
+```
+https://api.bodyworks.akshatjaiswal.me/api/v1
+```
+
+## Available resources
+
+<CardGroup cols={3}>
+  <Card title="Exercises" icon="dumbbell" href="/api-reference/exercises/list">
+    1,500+ exercises with rich metadata
+  </Card>
+  <Card title="Routines" icon="calendar" href="/api-reference/routines/list">
+    600+ structured workout programs
+  </Card>
+  <Card title="Body Parts" icon="person" href="/api-reference/body-parts/list">
+    10 body regions for filtering
+  </Card>
+  <Card title="Target Muscles" icon="fire" href="/api-reference/target-muscles/list">
+    19 muscle groups for filtering
+  </Card>
+  <Card title="Equipment" icon="weights" href="/api-reference/equipments/list">
+    28 equipment types for filtering
+  </Card>
+  <Card title="Health Check" icon="heart-pulse" href="/api-reference/overview#health-check">
+    Service status endpoint
+  </Card>
+</CardGroup>
+
+## Key features
+
+<AccordionGroup>
+  <Accordion title="Rich exercise data">
+    Every exercise record includes a name, target muscle, body part, required equipment, step-by-step instructional blog, multiple images, an animated GIF, YouTube video links, and searchable keywords.
+  </Accordion>
+  <Accordion title="Powerful filtering">
+    Filter exercises by body part, target muscle, equipment, or free-text search. Filter routines by goal, workout type, training level, duration, days per week, time per workout, equipment, gender, and category.
+  </Accordion>
+  <Accordion title="Paginated responses">
+    All list endpoints support `page` and `limit` query parameters. Responses include `totalPages` so you can build paginated UIs easily.
+  </Accordion>
+  <Accordion title="Tiered rate limiting">
+    General endpoints allow 20,000 requests per 15-minute window. The routines endpoint uses a stricter limit of 20 requests per 15-minute window to protect data-intensive queries.
+  </Accordion>
+  <Accordion title="Security-hardened">
+    The API uses Helmet for HTTP security headers, enforces HSTS with a 1-year max-age, and restricts CORS origins in production.
+  </Accordion>
+</AccordionGroup>

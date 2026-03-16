@@ -1,0 +1,185 @@
+---
+title: Filtering
+description: Use query parameters to filter exercises and routines by equipment, body part, goal, and more.
+---
+
+Both the exercises and routines endpoints support query parameters for filtering results. You can combine multiple filters in a single request.
+
+<Tabs>
+  <Tab title="Exercises">
+
+## Exercises filters
+
+**Endpoint:** `GET /api/v1/exercises`
+
+### Query parameters
+
+| Parameter | Type | Description | Example |
+|---|---|---|---|
+| `equipment` | string | Filter by equipment type | `barbell`, `body weight`, `dumbbell` |
+| `bodypart` | string | Filter by body part | `chest`, `waist`, `upper legs`, `back` |
+| `targetMuscle` | string | Filter by target muscle | `abs`, `glutes`, `pectorals`, `quads` |
+| `search` | string | Free-text search across exercise names and descriptions | `squat`, `push` |
+| `page` | number | Page number (default: `1`) | `2` |
+| `limit` | number | Results per page (default: `10`) | `20` |
+
+### Examples
+
+**Filter by equipment:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?equipment=barbell"
+```
+
+**Filter by body part:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?bodypart=chest"
+```
+
+**Filter by target muscle:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?targetMuscle=glutes"
+```
+
+**Free-text search:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?search=squat"
+```
+
+**Combining multiple filters:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?bodypart=upper+legs&equipment=barbell&limit=20"
+```
+
+**JavaScript example:**
+
+```javascript
+const params = new URLSearchParams({
+  bodypart: 'chest',
+  equipment: 'dumbbell',
+  page: '1',
+  limit: '15',
+});
+
+const response = await fetch(
+  `https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?${params}`
+);
+const data = await response.json();
+
+console.log(`Found ${data.totalExercises} exercises across ${data.totalPages} pages`);
+console.log(data.data);
+```
+
+  </Tab>
+  <Tab title="Routines">
+
+## Routines filters
+
+**Endpoint:** `GET /api/v1/routines`
+
+<Warning>
+The routines endpoint is rate-limited to 20 requests per 15-minute window. Cache results where possible to avoid exhausting your quota. See [Rate limits](/guides/rate-limits) for details.
+</Warning>
+
+### Query parameters
+
+| Parameter | Type | Description | Example |
+|---|---|---|---|
+| `goal` | string | Training goal | `build muscle`, `lose weight`, `endurance` |
+| `type` | string | Routine structure | `full body`, `split`, `upper lower` |
+| `level` | string | Experience level | `beginner`, `intermediate`, `advanced` |
+| `duration` | string | Program length | `4 weeks`, `8 weeks`, `12 weeks` |
+| `days_per_week` | number | Training days per week | `3`, `4`, `5` |
+| `time` | string | Session duration | `30-60 minutes`, `60-90 minutes` |
+| `equipment` | string | Required equipment | `bodyweight`, `barbell`, `dumbbells` |
+| `gender` | string | Target gender | `male`, `female` |
+| `category` | string | Routine category | `Workout for men`, `Workout for women` |
+| `search` | string | Free-text search | `strength`, `cardio` |
+| `page` | number | Page number (default: `1`) | `2` |
+| `limit` | number | Results per page | `10` |
+
+### Examples
+
+**Filter by goal:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?goal=build+muscle"
+```
+
+**Filter by level:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?level=beginner"
+```
+
+**Filter by type and duration:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?type=full+body&duration=4+weeks"
+```
+
+**Filter by days per week and equipment:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?days_per_week=4&equipment=bodyweight"
+```
+
+**Combining multiple filters:**
+
+```bash
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?goal=build+muscle&level=intermediate&type=split&days_per_week=4"
+```
+
+**JavaScript example:**
+
+```javascript
+const params = new URLSearchParams({
+  goal: 'build muscle',
+  level: 'beginner',
+  equipment: 'bodyweight',
+  days_per_week: '3',
+});
+
+const response = await fetch(
+  `https://api.bodyworks.akshatjaiswal.me/api/v1/routines?${params}`
+);
+const data = await response.json();
+
+console.log(`Found ${data.totalRoutines} routines across ${data.totalPages} pages`);
+console.log(data.finalData);
+```
+
+  </Tab>
+</Tabs>
+
+## Combining filters
+
+All filter parameters can be combined freely. Each additional parameter narrows the result set.
+
+```bash
+# Exercises: bodyweight chest exercises matching "push"
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?bodypart=chest&equipment=body+weight&search=push"
+
+# Routines: 4-day beginner muscle-building splits
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?goal=build+muscle&level=beginner&type=split&days_per_week=4"
+```
+
+## Case sensitivity
+
+<Note>
+Filter values are case-sensitive. Use lowercase for all parameter values to match the data in the API.
+
+- Use `bodypart=chest`, not `bodypart=Chest`
+- Use `equipment=body weight`, not `equipment=Body Weight`
+- Use `level=beginner`, not `level=Beginner`
+</Note>
+
+If a filter returns no results, verify the casing and spelling of your parameter values. You can retrieve the full list of valid values from the reference endpoints:
+
+- `GET /api/v1/bodyParts` — all valid body part values
+- `GET /api/v1/targetMuscles` — all valid target muscle values
+- `GET /api/v1/equipments` — all valid equipment values

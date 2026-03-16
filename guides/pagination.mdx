@@ -1,0 +1,202 @@
+---
+title: Pagination
+description: All list endpoints return paginated results. Use page and limit parameters to navigate through data.
+---
+
+List endpoints return results in pages. Use the `page` and `limit` query parameters to control which page of results you receive and how many items are returned per page.
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `page` | number | `1` | The page number to retrieve. Starts at `1`. |
+| `limit` | number | `10` | Number of results per page. |
+
+## Response shape
+
+Paginated responses include metadata fields alongside the result array. The field names vary by endpoint:
+
+<Tabs>
+  <Tab title="Exercises">
+
+```json
+{
+  "totalExercises": 1324,
+  "totalPages": 133,
+  "data": [
+    {
+      "id": "0001",
+      "name": "3/4 sit-up",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs"
+    }
+  ]
+}
+```
+
+  </Tab>
+  <Tab title="Routines">
+
+```json
+{
+  "totalRoutines": 87,
+  "totalPages": 9,
+  "finalData": [
+    {
+      "id": "r001",
+      "title": "Beginner Full Body",
+      "goal": "build muscle",
+      "level": "beginner",
+      "days_per_week": 3
+    }
+  ]
+}
+```
+
+  </Tab>
+  <Tab title="Body parts">
+
+```json
+{
+  "totalBodyParts": 10,
+  "data": [
+    "back",
+    "cardio",
+    "chest",
+    "lower arms",
+    "lower legs",
+    "neck",
+    "shoulders",
+    "upper arms",
+    "upper legs",
+    "waist"
+  ]
+}
+```
+
+  </Tab>
+  <Tab title="Target muscles">
+
+```json
+{
+  "totalTargetMuscles": 21,
+  "data": [
+    "abs",
+    "biceps",
+    "calves",
+    "glutes"
+  ]
+}
+```
+
+  </Tab>
+  <Tab title="Equipments">
+
+```json
+{
+  "totalEquipments": 13,
+  "data": [
+    "barbell",
+    "body weight",
+    "cable",
+    "dumbbell"
+  ]
+}
+```
+
+  </Tab>
+</Tabs>
+
+## Fetching a specific page
+
+```bash
+# Page 3 of exercises, 20 results per page
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/exercises?page=3&limit=20"
+```
+
+```bash
+# Page 2 of routines, default page size
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines?page=2"
+```
+
+## Iterating all pages
+
+Use `totalPages` from the first response to determine how many pages exist, then fetch each one in sequence.
+
+### Practical example: fetch all exercises
+
+```javascript
+async function fetchAllExercises() {
+  const baseUrl = 'https://api.bodyworks.akshatjaiswal.me/api/v1/exercises';
+  const limit = 100;
+  let page = 1;
+  let totalPages = null;
+  const allExercises = [];
+
+  do {
+    const response = await fetch(`${baseUrl}?page=${page}&limit=${limit}`);
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Set totalPages from the first response
+    if (totalPages === null) {
+      totalPages = data.totalPages;
+      console.log(`Fetching ${data.totalExercises} exercises across ${totalPages} pages...`);
+    }
+
+    allExercises.push(...data.data);
+    console.log(`Fetched page ${page}/${totalPages} (${allExercises.length} exercises so far)`);
+
+    page++;
+  } while (page <= totalPages);
+
+  return allExercises;
+}
+
+const exercises = await fetchAllExercises();
+console.log(`Total fetched: ${exercises.length}`);
+```
+
+<Warning>
+Avoid setting `limit` to an arbitrarily large number to fetch all results in one request. Use pagination to stay within expected response sizes and avoid timeouts.
+</Warning>
+
+## Iterating with filters
+
+Filters and pagination parameters can be combined. The `totalPages` value in the response reflects the total number of pages for the filtered result set.
+
+```javascript
+async function fetchExercisesByBodyPart(bodypart) {
+  const baseUrl = 'https://api.bodyworks.akshatjaiswal.me/api/v1/exercises';
+  const limit = 50;
+  let page = 1;
+  let totalPages = null;
+  const results = [];
+
+  do {
+    const params = new URLSearchParams({ bodypart, page, limit });
+    const response = await fetch(`${baseUrl}?${params}`);
+    const data = await response.json();
+
+    if (totalPages === null) {
+      totalPages = data.totalPages;
+    }
+
+    results.push(...data.data);
+    page++;
+  } while (page <= totalPages);
+
+  return results;
+}
+
+const chestExercises = await fetchExercisesByBodyPart('chest');
+```
+
+<Tip>
+Check `totalPages` before starting a loop. If `totalPages` is `1`, you already have all the results and do not need additional requests.
+</Tip>

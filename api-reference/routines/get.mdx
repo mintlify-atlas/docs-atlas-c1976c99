@@ -1,0 +1,148 @@
+---
+title: 'Get routine'
+description: 'Retrieve a single workout routine by its unique integer ID.'
+---
+
+**`GET /api/v1/routines/:id`**
+
+Returns a single workout routine object identified by its integer ID.
+
+<Note>
+Routine IDs are **integers** (e.g. `1`, `42`), unlike exercise IDs which are zero-padded strings (e.g. `"0001"`).
+</Note>
+
+## Path parameters
+
+<ParamField path="id" type="integer" required>
+  The unique integer identifier of the routine (e.g. `1`).
+</ParamField>
+
+## Response schema
+
+The response contains a single routine object — the same structure as an item in the `finalData` array from `GET /api/v1/routines`, but returned directly rather than inside an array.
+
+<ResponseField name="id" type="number">
+  Unique routine identifier.
+</ResponseField>
+
+<ResponseField name="category" type="string[]">
+  Array of category tags applied to the routine.
+</ResponseField>
+
+<ResponseField name="routine" type="object">
+  The full routine details.
+
+  <Expandable title="Routine detail properties" defaultOpen>
+    <ResponseField name="routine_title" type="string">
+      Title of the workout program.
+    </ResponseField>
+    <ResponseField name="routine_description" type="string">
+      Overview description of the program.
+    </ResponseField>
+    <ResponseField name="routine_imageUrl" type="string">
+      Relative URL of the routine's cover image.
+    </ResponseField>
+    <ResponseField name="workout_summary" type="object">
+      Key metadata about the program.
+
+      <Expandable title="Workout summary properties">
+        <ResponseField name="Main Goal" type="string">
+          Primary training objective.
+        </ResponseField>
+        <ResponseField name="Workout Type" type="string">
+          Structure of the program.
+        </ResponseField>
+        <ResponseField name="Training Level" type="string">
+          Intended experience level.
+        </ResponseField>
+        <ResponseField name="Program Duration" type="string">
+          How long the program runs.
+        </ResponseField>
+        <ResponseField name="Days Per Week" type="string">
+          Number of training days per week.
+        </ResponseField>
+        <ResponseField name="Time Per Workout" type="string">
+          Estimated session length.
+        </ResponseField>
+        <ResponseField name="Equipment Required" type="string">
+          Equipment needed.
+        </ResponseField>
+        <ResponseField name="Target Gender" type="string">
+          Intended audience.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="workout_plan" type="object[]">
+      Array of workout plan sections.
+
+      <Expandable title="Workout plan section properties">
+        <ResponseField name="heading" type="string">
+          Section heading.
+        </ResponseField>
+        <ResponseField name="day_plan" type="string">
+          HTML table string containing the day's exercise schedule.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.bodyworks.akshatjaiswal.me/api/v1/routines/1"
+```
+
+```javascript JavaScript
+const id = 1;
+const response = await fetch(
+  `https://api.bodyworks.akshatjaiswal.me/api/v1/routines/${id}`
+);
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+### Example response
+
+```json
+{
+  "category": ["Workouts For Men", "Muscle Building", "Full Body"],
+  "routine": {
+    "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
+    "routine_description": "No equipment or gym? No problem...",
+    "routine_imageUrl": "api.bodyworks.akshatjaiswal.me/assets/routine/1.webp",
+    "workout_summary": {
+      "Main Goal": "Build Muscle",
+      "Workout Type": "Full Body",
+      "Training Level": "Beginner",
+      "Program Duration": "4 weeks",
+      "Days Per Week": "4",
+      "Time Per Workout": "30-60 minutes",
+      "Equipment Required": "Bodyweight",
+      "Target Gender": "Male & Female"
+    },
+    "workout_plan": [
+      {
+        "heading": "Complex 1",
+        "day_plan": "<table>...</table>"
+      }
+    ]
+  },
+  "id": 1
+}
+```
+
+## Not found
+
+If no routine exists for the given ID, the API returns a `404`:
+
+```json
+{
+  "error": "Endpoint not found",
+  "message": "The requested resource does not exist"
+}
+```
